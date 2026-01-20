@@ -13,6 +13,9 @@ export class GameStartController extends Component {
     public startMenuNode: Node = null!; // 拖入上面的 Start_Menu 节点
 
     @property(Node)
+    public loginPanel: Node = null!; // 登录注册面板
+
+    @property(Node)
     public audioButton: Node = null!; // 拖入上面的 Audio_Button 节点
 
     start() {
