@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, AudioSource, tween, Vec3, UIOpacity, sys } from 'cc';
+import { UIManager } from '../UIManager';
 const { ccclass, property } = _decorator;
 
 const AUDIO_MUTED_KEY = 'GAME_AUDIO_MUTED'; // 与 GlobalAudioToggle 保持一致
@@ -17,6 +18,10 @@ export class GameStartController extends Component {
 
     @property(Node)
     public audioButton: Node = null!; // 拖入上面的 Audio_Button 节点
+
+    onLoad() {
+        UIManager.getInstance();
+    }
 
     start() {
     }

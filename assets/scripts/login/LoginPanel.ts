@@ -1,4 +1,5 @@
-import { _decorator, Component, Node, Sprite, SpriteFrame, Button, EditBox, tween, Vec3 } from 'cc';
+import { _decorator, Component, Node, Sprite, SpriteFrame, Button, EditBox, tween, Vec3, Prefab } from 'cc';
+import { UIManager } from '../UIManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('LoginPanel')
@@ -23,6 +24,15 @@ export class LoginPanel extends Component {
 
     @property(EditBox)
     registerUsernameInput: EditBox = null!;
+
+    @property(EditBox)
+    registerPasswordInput: EditBox = null!;
+
+    @property(EditBox)
+    registerPasswordConfirmInput: EditBox = null!;
+
+    @property(EditBox)
+    registerNicknameInput: EditBox = null!;
 
     start() {
         // 初始状态：默认显示登录
@@ -62,6 +72,9 @@ export class LoginPanel extends Component {
 
     onRegisterBtnClick(event: Event | null) {
         console.log('onRegisterBtnClick');
+        if (this.validateRegister()) {
+            console.log('注册成功');
+        }
     }
 
     /**
@@ -88,7 +101,58 @@ export class LoginPanel extends Component {
         }
     }
 
-    
+    validateUsername(username: string) {
+        if (username.length < 6 || username.length > 20) {
+            UIManager.getInstance().showTip("用户名长度为6-20位！");
+            return false;
+        }
+        // 使用正则过滤：只保留数字、字母和下划线
+        // \u4e00-\u9fa5 是常见中文字符范围，我们直接用反向逻辑
+        let filteredText = username.replace(/[^\w]/g, ''); 
+
+        if (username !== filteredText) {
+            UIManager.getInstance().showTip("仅限输入字母、数字和下划线！");
+            return false;
+        }
+        return true;
+    }
+
+    validatePassword(password: string, passwordConfirm: string) {
+        if (password.length < 6 || password.length > 32 || passwordConfirm.length < 6 || passwordConfirm.length > 32) {
+            UIManager.getInstance().showTip("密码长度为6-32位！");
+            return false;
+        }
+        if (password !== passwordConfirm) {
+            UIManager.getInstance().showTip("密码不一致！");
+            return false;
+        }
+        return true;
+    }
+
+    validateNickname(nickname: string) {
+        if (nickname.length < 2 || nickname.length > 20) {
+            UIManager.getInstance().showTip("昵称长度为2-20位！");
+            return false;
+        }
+        return true;
+    }
+
+    validateRegister() {
+        const username = this.registerUsernameInput.string;
+        const password = this.registerPasswordInput.string;
+        const passwordConfirm = this.registerPasswordConfirmInput.string;
+        const nickname = this.registerNicknameInput.string;
+
+        if (
+            !this.validateUsername(username) || 
+            !this.validatePassword(password, passwordConfirm) || 
+            !this.validateNickname(nickname)
+        ) {
+            return false;
+        }
+        return true;
+    }
+
 }
 
 /**
