@@ -1,0 +1,158 @@
+---
+description: Cocos Creator 3.8.8 开发规范和最佳实践
+globs: assets/**/*.{ts,js}
+alwaysApply: false
+---
+
+# Cocos Creator 3.8.8 开发规范
+
+## 导入规范
+
+```typescript
+// ✅ 推荐：从 'cc' 统一导入
+import { _decorator, Component, Node, Vec3, Prefab } from 'cc';
+const { ccclass, property } = _decorator;
+
+// ❌ 避免：分散导入或使用废弃 API
+import { Component } from 'cc/core';
+```
+
+## 组件定义
+
+```typescript
+// ✅ 推荐
+@ccclass('MyComponent')
+export class MyComponent extends Component {
+    @property(Node)
+    targetNode: Node = null!;  // 使用 null! 非空断言
+
+    @property({ type: Prefab, tooltip: '敌人预制体' })
+    enemyPrefab: Prefab = null!;
+}
+
+// ❌ 避免
+@ccclass('MyComponent')
+export class MyComponent extends Component {
+    @property(Node)
+    targetNode: Node | null = null;  // 不要用 union 类型
+}
+```
+
+## 生命周期顺序
+
+按以下顺序组织生命周期方法：`onLoad` → `start` → `update` → `lateUpdate` → `onEnable` → `onDisable` → `onDestroy`
+
+## 节点操作
+
+```typescript
+// ✅ 推荐：使用 active 控制显隐
+this.node.active = false;
+
+// ✅ 推荐：安全获取组件
+const sprite = this.node.getComponent(Sprite);
+if (sprite) { sprite.spriteFrame = newFrame; }
+
+// ❌ 避免：直接使用 destroy 销毁未检查的节点
+this.node.destroy();  // 应先判断 isValid
+```
+
+## Tween 动画
+
+```typescript
+// ✅ 推荐：链式调用 + 缓动函数
+import { tween, Vec3, easing } from 'cc';
+
+tween(this.node)
+    .to(0.3, { scale: new Vec3(1.2, 1.2, 1) }, { easing: 'backOut' })
+    .to(0.2, { scale: Vec3.ONE })
+    .start();
+
+// ✅ 推荐：停止动画防止内存泄漏
+Tween.stopAllByTarget(this.node);
+```
+
+## 事件处理
+
+```typescript
+// ✅ 推荐：使用 EventTarget 或 Node 事件
+onLoad() {
+    this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd, this);
+}
+
+onDestroy() {
+    this.node.off(Node.EventType.TOUCH_END, this.onTouchEnd, this);
+}
+
+// ✅ 推荐：Button 点击事件回调签名
+onButtonClick(event: Event, customData: string) {
+    // customData 来自编辑器设置
+}
+```
+
+## 资源管理
+
+```typescript
+// ✅ 推荐：使用 resources 或 assetManager 动态加载
+import { resources, SpriteFrame } from 'cc';
+
+resources.load('textures/icon', SpriteFrame, (err, spriteFrame) => {
+    if (err) { console.error(err); return; }
+    this.sprite.spriteFrame = spriteFrame;
+});
+
+// ✅ 推荐：释放不再使用的资源
+resources.release('textures/icon');
+```
+
+## 单例模式
+
+```typescript
+// ✅ 推荐
+export class GameManager {
+    private static _instance: GameManager | null = null;
+    
+    static getInstance(): GameManager {
+        if (!this._instance) {
+            this._instance = new GameManager();
+        }
+        return this._instance;
+    }
+}
+```
+
+## 定时器
+
+```typescript
+// ✅ 推荐：使用 schedule 系列方法
+this.schedule(this.tick, 1.0);           // 每秒执行
+this.scheduleOnce(this.doOnce, 0.5);     // 延迟执行一次
+this.unschedule(this.tick);              // 取消定时器
+
+// ❌ 避免：直接使用 setTimeout/setInterval
+```
+
+## 对象池
+
+```typescript
+// ✅ 推荐：使用 NodePool 管理频繁创建销毁的节点
+import { NodePool, instantiate } from 'cc';
+
+private bulletPool: NodePool = new NodePool();
+
+getBullet(): Node {
+    return this.bulletPool.size() > 0 
+        ? this.bulletPool.get()! 
+        : instantiate(this.bulletPrefab);
+}
+
+recycleBullet(bullet: Node) {
+    this.bulletPool.put(bullet);
+}
+```
+
+## 性能注意事项
+
+- 避免在 `update` 中频繁创建对象（Vec3、数组等）
+- 使用 `@property` 引用节点，避免运行时 `find()` 查找
+- 批量操作 UI 时使用 `BatchedSpriteAssembler`
+- 动态图集：开启 `Auto Atlas` 减少 Draw Call
