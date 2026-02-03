@@ -1,5 +1,8 @@
-import { _decorator, Component, Node, Sprite, SpriteFrame, Button, EditBox, tween, Vec3, Prefab } from 'cc';
+import { _decorator, Component, Node, Sprite, SpriteFrame, Button, EditBox, tween, Vec3, Prefab, Tween } from 'cc';
 import { UIManager } from '../UIManager';
+import { httpClient } from '../net/HttpClient';
+import { ApiResponse } from '../net/ApiResponse';
+import { UserManager, UserInfo } from '../core/UserManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('LoginPanel')
@@ -68,12 +71,31 @@ export class LoginPanel extends Component {
 
     onLoginBtnClick(event: Event | null) {
         console.log('onLoginBtnClick');
+        const target = event?.target;
+        this.playButtonClickEffect(target instanceof Node ? target : null);
     }
 
-    onRegisterBtnClick(event: Event | null) {
+    async onRegisterBtnClick(event: Event | null) {
         console.log('onRegisterBtnClick');
+        const target = event?.target;
+        this.playButtonClickEffect(target instanceof Node ? target : null);
         if (this.validateRegister()) {
-            console.log('注册成功');
+            try {
+                const response = await httpClient.post<{ token: string; userInfo: UserInfo }>('/auth/register', {
+                    username: this.registerUsernameInput.string,
+                    password: this.registerPasswordInput.string,
+                    nickname: this.registerNicknameInput.string,
+                });
+                console.log('response', response);
+                if (response.code === 0 && response.data?.token) {
+                    UserManager.getInstance().setAuth(response.data.token, response.data.userInfo);
+                    httpClient.setAuthToken(response.data.token);
+                }
+                UIManager.getInstance().showTip('注册成功');
+            } catch (error) {
+                console.error('error', error);
+                UIManager.getInstance().showTip('注册失败');
+            }
         }
     }
 
@@ -151,6 +173,19 @@ export class LoginPanel extends Component {
             return false;
         }
         return true;
+    }
+
+    private async playButtonClickEffect(target: Node | null) {
+        if (!target) {
+            return;
+        }
+
+        Tween.stopAllByTarget(target);
+        const originalScale = target.scale.clone();
+        tween(target)
+            .to(0.06, { scale: new Vec3(originalScale.x * 0.95, originalScale.y * 0.95, originalScale.z) })
+            .to(0.06, { scale: originalScale })
+            .start();
     }
 
 }

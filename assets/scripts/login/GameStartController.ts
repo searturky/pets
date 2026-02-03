@@ -1,5 +1,7 @@
 import { _decorator, Component, Node, AudioSource, tween, Vec3, UIOpacity, sys } from 'cc';
 import { UIManager } from '../UIManager';
+import { UserManager } from '../core/UserManager';
+import { httpClient, initHttpClient } from '../net/HttpClient';
 const { ccclass, property } = _decorator;
 
 const AUDIO_MUTED_KEY = 'GAME_AUDIO_MUTED'; // 与 GlobalAudioToggle 保持一致
@@ -21,6 +23,20 @@ export class GameStartController extends Component {
 
     onLoad() {
         UIManager.getInstance();
+        this.initNetwork().then(() => {
+            const token = UserManager.getInstance().loadFromStorage();
+            if (token) {
+                httpClient.setAuthToken(token);
+            }
+        })
+    }
+
+    private async initNetwork() {
+        try {
+            await initHttpClient();
+        } catch (error) {
+            console.error('初始化网络配置失败', error);
+        }
     }
 
     start() {
