@@ -37,6 +37,13 @@ export class LoginPanel extends Component {
     @property(EditBox)
     registerNicknameInput: EditBox = null!;
 
+    @property(EditBox)
+    loginUsernameInput: EditBox = null!;
+    
+    @property(EditBox)
+    loginPasswordInput: EditBox = null!;
+
+
     start() {
         // 初始状态：默认显示登录
         this.switchTab(null, 'login');
@@ -69,32 +76,62 @@ export class LoginPanel extends Component {
         // AudioSource.playOneShot(...);
     }
 
-    onLoginBtnClick(event: Event | null) {
-        console.log('onLoginBtnClick');
-        const target = event?.target;
-        this.playButtonClickEffect(target instanceof Node ? target : null);
-    }
-
     async onRegisterBtnClick(event: Event | null) {
         console.log('onRegisterBtnClick');
         const target = event?.target;
         this.playButtonClickEffect(target instanceof Node ? target : null);
         if (this.validateRegister()) {
             try {
+                UIManager.getInstance().showTip({
+                    message: '注册中...',
+                    showCloseButton: false,
+                });
                 const response = await httpClient.post<{ token: string; userInfo: UserInfo }>('/auth/register', {
                     username: this.registerUsernameInput.string,
                     password: this.registerPasswordInput.string,
                     nickname: this.registerNicknameInput.string,
                 });
-                console.log('response', response);
                 if (response.code === 0 && response.data?.token) {
-                    UserManager.getInstance().setAuth(response.data.token, response.data.userInfo);
+                    UserManager.getInstance().setAuth(response.data.token);
                     httpClient.setAuthToken(response.data.token);
                 }
-                UIManager.getInstance().showTip('注册成功');
+                UIManager.getInstance().showTip({
+                    message: '注册成功',
+                });
             } catch (error) {
                 console.error('error', error);
-                UIManager.getInstance().showTip('注册失败');
+                UIManager.getInstance().showTip({
+                    message: '注册失败',
+                });
+            }
+        }
+    }
+
+    async onLoginBtnClick(event: Event | null) {
+        const target = event?.target;
+        this.playButtonClickEffect(target instanceof Node ? target : null);
+        if (this.validateLogin()) {
+            try {
+                UIManager.getInstance().showTip({
+                    message: '登录中...',
+                    showCloseButton: false,
+                });
+                const response = await httpClient.post<{ token: string }>('/auth/login', {
+                    username: this.loginUsernameInput.string,
+                    password: this.loginPasswordInput.string,
+                });
+                if (response.code === 0 && response.data?.token) {
+                    UserManager.getInstance().setAuth(response.data.token);
+                    httpClient.setAuthToken(response.data.token);
+                }
+                UIManager.getInstance().showTip({
+                    message: '登录成功',
+                });
+            } catch (error) {
+                console.error('error', error);
+                UIManager.getInstance().showTip({
+                    message: '登录失败',
+                });
             }
         }
     }
@@ -102,7 +139,7 @@ export class LoginPanel extends Component {
     /**
      * 当注册用户名文本发生改变时触发的回调
      */
-    onRegisterUsernameTextChanged(text: string, editbox: EditBox) {
+    onUsernameTextChanged(text: string, editbox: EditBox) {
         // 使用正则过滤：只保留数字、字母和下划线
         // \u4e00-\u9fa5 是常见中文字符范围，我们直接用反向逻辑
         let filteredText = text.replace(/[^\w]/g, ''); 
@@ -119,13 +156,15 @@ export class LoginPanel extends Component {
             this.scheduleOnce(() => {
                 editbox.focus();
             }, 0);
-            shakeNode(this.registerUsernameInput.node);
+            shakeNode(editbox.node);
         }
     }
 
     validateUsername(username: string) {
         if (username.length < 6 || username.length > 20) {
-            UIManager.getInstance().showTip("用户名长度为6-20位！");
+            UIManager.getInstance().showTip({
+                message: "用户名长度为6-20位！",
+            });
             return false;
         }
         // 使用正则过滤：只保留数字、字母和下划线
@@ -133,7 +172,9 @@ export class LoginPanel extends Component {
         let filteredText = username.replace(/[^\w]/g, ''); 
 
         if (username !== filteredText) {
-            UIManager.getInstance().showTip("仅限输入字母、数字和下划线！");
+            UIManager.getInstance().showTip({
+                message: "仅限输入字母、数字和下划线！",
+            });
             return false;
         }
         return true;
@@ -141,11 +182,15 @@ export class LoginPanel extends Component {
 
     validatePassword(password: string, passwordConfirm: string) {
         if (password.length < 6 || password.length > 32 || passwordConfirm.length < 6 || passwordConfirm.length > 32) {
-            UIManager.getInstance().showTip("密码长度为6-32位！");
+            UIManager.getInstance().showTip({
+                message: "密码长度为6-32位！",
+            });
             return false;
         }
         if (password !== passwordConfirm) {
-            UIManager.getInstance().showTip("密码不一致！");
+            UIManager.getInstance().showTip({
+                message: "密码不一致！",
+            });
             return false;
         }
         return true;
@@ -153,7 +198,9 @@ export class LoginPanel extends Component {
 
     validateNickname(nickname: string) {
         if (nickname.length < 2 || nickname.length > 20) {
-            UIManager.getInstance().showTip("昵称长度为2-20位！");
+            UIManager.getInstance().showTip({
+                message: "昵称长度为2-20位！",
+            });
             return false;
         }
         return true;
@@ -170,6 +217,15 @@ export class LoginPanel extends Component {
             !this.validatePassword(password, passwordConfirm) || 
             !this.validateNickname(nickname)
         ) {
+            return false;
+        }
+        return true;
+    }
+
+    validateLogin() {
+        const username = this.loginUsernameInput.string;
+        const password = this.loginPasswordInput.string;
+        if (!this.validateUsername(username) || !this.validatePassword(password, password)) {
             return false;
         }
         return true;

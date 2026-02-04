@@ -1,13 +1,21 @@
 import { _decorator, Component, Node, Label, Button, BlockInputEvents, tween, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
+export interface TipModalConfig {
+    title?: string;
+    message?: string;
+    showCloseButton?: boolean;
+    clickMaskClose?: boolean;
+    onClose?: () => void;
+}
+
 @ccclass('TipModal')
 export class TipModal extends Component {
     @property(Label)
     messageLabel: Label = null!;
 
     @property(Label)
-    titleLabel: Node = null!;
+    titleLabel: Label = null!;
 
     @property(Node)
     modalContainer: Node = null!;
@@ -18,7 +26,10 @@ export class TipModal extends Component {
     @property(Boolean)
     clickMaskClose: boolean = false;
 
-    private _callback: (() => void) | null = null;
+    @property(Boolean)
+    showCloseButton: boolean = true;
+
+    private _onClose: (() => void) | null = null;
     private _originalScale: Vec3 = new Vec3(1, 1, 1);
 
     onLoad() {
@@ -48,9 +59,18 @@ export class TipModal extends Component {
      * @param message 提示文本
      * @param callback 关闭后的回调
      */
-    show(message: string, callback?: () => void) {
-        this.messageLabel.string = message;
-        this._callback = callback || null;
+    show(config: TipModalConfig = {
+        title: '',
+        message: '',
+        showCloseButton: true,
+        clickMaskClose: false,
+        onClose: () => {},
+    }) {
+        this.messageLabel.string = config.message || '';
+        this.titleLabel.string = config.title || '';
+        this.closeButton.node.active = config.showCloseButton || true;
+        this.clickMaskClose = config.clickMaskClose || false;
+        this._onClose = config.onClose || null;
 
         // 像素风格弹出动画：从小到大，略带回弹
         this.modalContainer.setScale(0, 0, 1);
@@ -75,8 +95,8 @@ export class TipModal extends Component {
         tween(this.modalContainer)
             .to(0.15, { scale: new Vec3(0, 0, 1) }, { easing: 'backIn' })
             .call(() => {
-                if (this._callback) {
-                    this._callback();
+                if (this._onClose) {
+                    this._onClose();
                 }
                 this.node.active = false;
                 // this.node.destroy();
@@ -89,7 +109,7 @@ export class TipModal extends Component {
      */
     private onMaskClick(event: any) {
         // 只有点击遮罩层本身才关闭，点击模态框内部不关闭
-        if (event.target === this.node) {
+        if (event.target === this.node && this.clickMaskClose) {
             this.close();
         }
     }

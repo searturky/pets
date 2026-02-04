@@ -3473,12 +3473,12 @@
     "_enabled": true,
     "__prefab": null,
     "editingDidBegan": [],
-    "textChanged": [],
-    "editingDidEnded": [
+    "textChanged": [
       {
         "__id__": 109
       }
     ],
+    "editingDidEnded": [],
     "editingReturn": [],
     "_textLabel": {
       "__id__": 102
@@ -3497,10 +3497,12 @@
   },
   {
     "__type__": "cc.ClickEvent",
-    "target": null,
+    "target": {
+      "__id__": 75
+    },
     "component": "",
-    "_componentId": "",
-    "handler": "",
+    "_componentId": "da0d31TXBhG47fsCO6y6M93",
+    "handler": "onUsernameTextChanged",
     "customEventData": ""
   },
   {
@@ -4452,18 +4454,9 @@
       "__uuid__": "e31a372c-e787-4980-9541-02ef7c983421@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
-    "_hoverSprite": {
-      "__uuid__": "e31a372c-e787-4980-9541-02ef7c983421@f9941",
-      "__expectedType__": "cc.SpriteFrame"
-    },
-    "_pressedSprite": {
-      "__uuid__": "544e49d6-3f05-4fa8-9a9e-091f98fc2ce8@f9941",
-      "__expectedType__": "cc.SpriteFrame"
-    },
-    "_disabledSprite": {
-      "__uuid__": "951249e0-9f16-456d-8b85-a6ca954da16b@f9941",
-      "__expectedType__": "cc.SpriteFrame"
-    },
+    "_hoverSprite": null,
+    "_pressedSprite": null,
+    "_disabledSprite": null,
     "_duration": 0.1,
     "_zoomScale": 1.2,
     "_target": {
@@ -5124,7 +5117,7 @@
     },
     "component": "",
     "_componentId": "da0d31TXBhG47fsCO6y6M93",
-    "handler": "onRegisterUsernameTextChanged",
+    "handler": "onUsernameTextChanged",
     "customEventData": ""
   },
   {
@@ -7495,6 +7488,12 @@
     },
     "registerNicknameInput": {
       "__id__": 193
+    },
+    "loginUsernameInput": {
+      "__id__": 108
+    },
+    "loginPasswordInput": {
+      "__id__": 123
     },
     "_id": "3b43RrpKRLjLhyPFevvwHO"
   },

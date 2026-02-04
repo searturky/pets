@@ -1,6 +1,6 @@
 // UIManager.ts
 import { _decorator, Component, Node, director, Prefab, instantiate, resources, UITransform, Canvas, Widget, view } from 'cc';
-import { TipModal } from './TipModal';
+import { TipModal, TipModalConfig } from './TipModal';
 
 export class UIManager {
     private static _instance: UIManager = null;
@@ -73,8 +73,13 @@ export class UIManager {
         });
     }
     
-    showTip(message: string, callback?: () => void) {
-        console.log('showTip 调用', message);
+    showTip(config: TipModalConfig = {
+        title: '',
+        message: '',
+        onClose: () => {},
+        showCloseButton: true,
+        clickMaskClose: false,
+    }) {
         
         if (!this.tipModalPrefab) {
             console.error('tipModalPrefab 还未加载完成');
@@ -88,6 +93,6 @@ export class UIManager {
         
         const tipModal = this.tipModalInstance.getComponent(TipModal);
         this.tipModalInstance.active = true;
-        tipModal.show(message, callback);
+        tipModal.show(config);
     }
 }

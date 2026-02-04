@@ -22,9 +22,8 @@ export class UserManager {
         return UserManager.instance;
     }
 
-    setAuth(token: string, userInfo: UserInfo) {
+    setAuth(token: string) {
         this.token = token;
-        this.userInfo = userInfo;
         sys.localStorage.setItem(AUTH_TOKEN_KEY, token);
     }
 
