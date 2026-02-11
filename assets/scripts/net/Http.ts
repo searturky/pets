@@ -24,7 +24,7 @@ export class Http {
     constructor(options: RequestOptions = {}) {
         this.baseUrl = options.baseUrl ?? '';
         this.headers = options.headers ?? {};
-        this.timeoutMs = options.timeoutMs ?? 10000;
+        this.timeoutMs = options.timeoutMs ?? 600000; // 10 minutes
     }
 
     setBaseUrl(baseUrl: string) {
