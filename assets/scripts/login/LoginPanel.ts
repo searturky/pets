@@ -95,9 +95,7 @@ export class LoginPanel extends Component {
                     UserManager.getInstance().setAuth(response.data.token);
                     httpClient.setAuthToken(response.data.token);
                     UserManager.getInstance().setUserInfo(response.data.userInfo);
-                    UIManager.getInstance().showTip({
-                        message: '注册成功',
-                    });
+                    UIManager.getInstance().hideTip();
                     director.loadScene('main');
                     return;
                 }
@@ -130,9 +128,7 @@ export class LoginPanel extends Component {
                     UserManager.getInstance().setAuth(response.data.token);
                     httpClient.setAuthToken(response.data.token);
                     UserManager.getInstance().setUserInfo(response.data.userInfo);
-                    UIManager.getInstance().showTip({
-                        message: '登录成功',
-                    });
+                    UIManager.getInstance().hideTip();
                     director.loadScene('main');
                     return;
                 }

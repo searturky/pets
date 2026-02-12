@@ -63,6 +63,7 @@ export class GameStartController extends Component {
             .call(() => {
                 this.startMenuNode.active = false; // 彻底关闭界面
                 this.audioButton.active = true; // 显示开始按钮
+                this.loginPanel.active = true; // 显示登录注册面板
             })
             .start();
         

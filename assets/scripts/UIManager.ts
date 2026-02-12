@@ -95,4 +95,10 @@ export class UIManager {
         this.tipModalInstance.active = true;
         tipModal.show(config);
     }
+
+    hideTip() {
+        if (this.tipModalInstance) {
+            this.tipModalInstance.active = false;
+        }
+    }
 }
