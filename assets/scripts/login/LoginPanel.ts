@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Sprite, SpriteFrame, Button, EditBox, tween, Vec3, Prefab, Tween } from 'cc';
+import { _decorator, Component, Node, Sprite, SpriteFrame, Button, EditBox, tween, Vec3, Prefab, Tween, director } from 'cc';
 import { UIManager } from '../UIManager';
 import { httpClient } from '../net/HttpClient';
 import { ApiResponse } from '../net/ApiResponse';
@@ -94,9 +94,15 @@ export class LoginPanel extends Component {
                 if (response.code === 0 && response.data?.token) {
                     UserManager.getInstance().setAuth(response.data.token);
                     httpClient.setAuthToken(response.data.token);
+                    UserManager.getInstance().setUserInfo(response.data.userInfo);
+                    UIManager.getInstance().showTip({
+                        message: '注册成功',
+                    });
+                    director.loadScene('main');
+                    return;
                 }
                 UIManager.getInstance().showTip({
-                    message: '注册成功',
+                    message: response.message || '注册失败',
                 });
             } catch (error) {
                 console.error('error', error);
@@ -116,16 +122,22 @@ export class LoginPanel extends Component {
                     message: '登录中...',
                     showCloseButton: false,
                 });
-                const response = await httpClient.post<{ token: string }>('/auth/login', {
+                const response = await httpClient.post<{ token: string; userInfo: UserInfo }>('/auth/login', {
                     username: this.loginUsernameInput.string,
                     password: this.loginPasswordInput.string,
                 });
                 if (response.code === 0 && response.data?.token) {
                     UserManager.getInstance().setAuth(response.data.token);
                     httpClient.setAuthToken(response.data.token);
+                    UserManager.getInstance().setUserInfo(response.data.userInfo);
+                    UIManager.getInstance().showTip({
+                        message: '登录成功',
+                    });
+                    director.loadScene('main');
+                    return;
                 }
                 UIManager.getInstance().showTip({
-                    message: '登录成功',
+                    message: response.message || '登录失败',
                 });
             } catch (error) {
                 console.error('error', error);

@@ -35,6 +35,10 @@ export class UserManager {
         return this.userInfo;
     }
 
+    setUserInfo(userInfo: UserInfo) {
+        this.userInfo = userInfo;
+    }
+
     loadFromStorage() {
         const token = sys.localStorage.getItem(AUTH_TOKEN_KEY);
         this.token = token && token.length > 0 ? token : null;
