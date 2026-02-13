@@ -6,6 +6,9 @@ alwaysApply: false
 
 # Cocos Creator 3.8.8 开发规范
 
+## 开发前
+- 请完整浏览完项目的结构的代码，尽可能工程化结构化的编码
+
 ## 导入规范
 
 ```typescript
